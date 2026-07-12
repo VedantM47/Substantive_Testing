@@ -1,0 +1,33 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color-scheme: light;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background: #ffffff;
+  color: #172033;
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+button,
+a,
+input {
+  outline-color: #2563eb;
+}
+
+.react-pdf__Page {
+  box-shadow: 0 16px 45px rgba(15, 23, 42, 0.12);
+}
+
+.react-pdf__Page canvas {
+  height: auto !important;
+  max-width: 100% !important;
+}
