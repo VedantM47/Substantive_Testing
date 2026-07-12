@@ -12,6 +12,7 @@ class Settings(BaseSettings):
     )
     upload_dir: Path = Field(default=Path("uploads"), validation_alias="UPLOAD_DIR")
     allowed_origins: list[str] = Field(default=["*"], validation_alias="ALLOWED_ORIGINS")
+    tesseract_cmd: str | None = Field(default=None, validation_alias="TESSERACT_CMD")
 
     model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8")
 

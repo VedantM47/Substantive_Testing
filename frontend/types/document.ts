@@ -10,3 +10,16 @@ export type DocumentMetadata = DocumentSummary & {
   file_path: string;
   mime_type: string;
 };
+
+export type ExtractedPage = {
+  page: number;
+  method: "native" | "ocr";
+  text: string;
+};
+
+export type ParseResponse = {
+  document_id: string;
+  status: "completed";
+  pages_processed: number;
+  pages_failed: number;
+};

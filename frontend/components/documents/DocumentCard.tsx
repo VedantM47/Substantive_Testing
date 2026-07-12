@@ -34,11 +34,14 @@ export function DocumentCard({ document }: { document: DocumentSummary }) {
       </div>
 
       <div className="mt-5 flex flex-wrap gap-3">
+        <span className="inline-flex min-h-10 items-center rounded-xl border border-line bg-surface px-3 text-sm font-medium text-muted">
+          Ready
+        </span>
         <Link
           href={`/documents/${document.id}`}
           className="inline-flex min-h-10 items-center justify-center rounded-xl bg-accent px-4 py-2 text-sm font-medium text-white transition hover:bg-blue-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2"
         >
-          View
+          Open
         </Link>
         <a
           href={documentDownloadUrl(document.id)}

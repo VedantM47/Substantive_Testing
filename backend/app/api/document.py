@@ -1,4 +1,3 @@
-from pathlib import Path
 from uuid import UUID
 
 from fastapi import APIRouter, Depends, File, HTTPException, UploadFile, status
@@ -13,8 +12,10 @@ from app.services.document_service import (
     DocumentNotFoundError,
     InvalidDocumentError,
     create_document,
+    delete_document,
     get_document,
     list_documents,
+    resolve_document_path,
 )
 
 router = APIRouter(prefix="/documents", tags=["documents"])
@@ -50,6 +51,20 @@ def get_document_metadata(document_id: UUID, db: Session = Depends(get_db)) -> D
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(exc)) from exc
 
 
+@router.delete("/{document_id}", status_code=status.HTTP_204_NO_CONTENT)
+def remove_document(document_id: UUID, db: Session = Depends(get_db)) -> None:
+    try:
+        delete_document(db, document_id)
+    except DocumentNotFoundError as exc:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(exc)) from exc
+    except SQLAlchemyError as exc:
+        db.rollback()
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Could not delete document.",
+        ) from exc
+
+
 @router.get("/{document_id}/download")
 def download_document(document_id: UUID, db: Session = Depends(get_db)) -> FileResponse:
     try:
@@ -57,7 +72,7 @@ def download_document(document_id: UUID, db: Session = Depends(get_db)) -> FileR
     except DocumentNotFoundError as exc:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(exc)) from exc
 
-    path = Path(document.file_path)
+    path = resolve_document_path(document)
     if not path.is_file():
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
