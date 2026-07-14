@@ -12,6 +12,14 @@ class Settings(BaseSettings):
     )
     upload_dir: Path = Field(default=Path("uploads"), validation_alias="UPLOAD_DIR")
     allowed_origins: list[str] = Field(default=["*"], validation_alias="ALLOWED_ORIGINS")
+    google_api_key: str | None = Field(default=None, validation_alias="GOOGLE_API_KEY")
+    gemini_embedding_model: str = Field(
+        default="models/gemini-embedding-001",
+        validation_alias="GEMINI_EMBEDDING_MODEL",
+    )
+    gemini_chat_model: str = Field(default="gemini-3.1-flash-lite", validation_alias="GEMINI_CHAT_MODEL")
+    faiss_index_dir: Path = Field(default=Path("faiss_index"), validation_alias="FAISS_INDEX_DIR")
+    search_top_k: int = Field(default=5, validation_alias="SEARCH_TOP_K")
 
     model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8")
 
