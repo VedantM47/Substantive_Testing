@@ -11,6 +11,7 @@ from app.models.document import Document
 MAX_UPLOAD_SIZE = 100 * 1024 * 1024
 PDF_MIME_TYPE = "application/pdf"
 CHUNK_SIZE = 1024 * 1024
+BACKEND_ROOT = Path(__file__).resolve().parents[2]
 
 
 class InvalidDocumentError(ValueError):
@@ -80,3 +81,29 @@ def get_document(db: Session, document_id: UUID) -> Document:
     if document is None:
         raise DocumentNotFoundError("Document not found.")
     return document
+
+
+def delete_document(db: Session, document_id: UUID) -> None:
+    document = get_document(db, document_id)
+    path = resolve_document_path(document)
+    db.delete(document)
+    db.commit()
+    path.unlink(missing_ok=True)
+
+
+def resolve_document_path(document: Document) -> Path:
+    stored_path = Path(document.file_path)
+    candidates = [stored_path]
+    if not stored_path.is_absolute():
+        candidates.extend(
+            [
+                BACKEND_ROOT / stored_path,
+                BACKEND_ROOT / "uploads" / Path(document.stored_filename).name,
+            ]
+        )
+
+    for path in candidates:
+        if path.is_file():
+            return path
+
+    return stored_path

@@ -25,7 +25,7 @@ export function PageControls({
         <Button variant="secondary" onClick={onPrevious} disabled={pageNumber <= 1}>
           Previous
         </Button>
-        <Button variant="secondary" onClick={onNext} disabled={pageNumber >= totalPages}>
+        <Button variant="secondary" onClick={onNext} disabled={totalPages > 0 && pageNumber >= totalPages}>
           Next
         </Button>
       </div>

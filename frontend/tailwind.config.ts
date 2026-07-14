@@ -9,10 +9,10 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        ink: "#172033",
+        ink: "#111827",
         muted: "#667085",
-        line: "#d9e0ea",
-        surface: "#f6f8fb",
+        line: "#e5e7eb",
+        surface: "#fafafa",
         accent: "#2563eb",
       },
       boxShadow: {

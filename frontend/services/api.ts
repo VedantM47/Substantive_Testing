@@ -1,8 +1,8 @@
 import axios from "axios";
-import type { DocumentMetadata, DocumentSummary } from "@/types/document";
+import type { DocumentMetadata, DocumentSummary, ExtractedPage, ParseResponse } from "@/types/document";
 
 export const API_BASE_URL =
-  process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:8000";
+  process.env.NEXT_PUBLIC_API_BASE_URL ?? "/api";
 
 const api = axios.create({
   baseURL: API_BASE_URL,
@@ -16,6 +16,20 @@ export async function listDocuments(): Promise<DocumentSummary[]> {
 
 export async function getDocument(id: string): Promise<DocumentMetadata> {
   const { data } = await api.get<DocumentMetadata>(`/documents/${id}`);
+  return data;
+}
+
+export async function deleteDocument(id: string): Promise<void> {
+  await api.delete(`/documents/${id}`);
+}
+
+export async function parseDocument(id: string): Promise<ParseResponse> {
+  const { data } = await api.post<ParseResponse>(`/documents/${id}/parse`);
+  return data;
+}
+
+export async function getDocumentPages(id: string): Promise<ExtractedPage[]> {
+  const { data } = await api.get<ExtractedPage[]>(`/documents/${id}/pages`);
   return data;
 }
 

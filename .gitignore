@@ -37,3 +37,4 @@ coverage/
 # Uploaded runtime files
 backend/uploads/*
 !backend/uploads/.gitkeep
+refrence_inputs/

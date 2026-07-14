@@ -3,9 +3,8 @@
 import Link from "next/link";
 
 const nav = [
+  { label: "Dashboard", href: "/", active: false, disabled: false },
   { label: "Documents", href: "/", active: true, disabled: false },
-  { label: "Audit", href: "#", active: false, disabled: true },
-  { label: "Reports", href: "#", active: false, disabled: true },
   { label: "Settings", href: "#", active: false, disabled: true },
 ];
 
