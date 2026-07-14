@@ -6,6 +6,7 @@ from fastapi.openapi.utils import get_openapi
 from fastapi.responses import JSONResponse
 
 from app.api.document import router as document_router
+from app.api.parser import router as parser_router
 from app.config import get_settings
 from app.routes.search import router as search_router
 
@@ -23,6 +24,7 @@ app.add_middleware(
 )
 
 app.include_router(document_router)
+app.include_router(parser_router)
 app.include_router(search_router)
 
 

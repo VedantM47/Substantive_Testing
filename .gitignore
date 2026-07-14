@@ -38,3 +38,4 @@ coverage/
 backend/uploads/*
 !backend/uploads/.gitkeep
 backend/faiss_index/
+refrence_inputs/

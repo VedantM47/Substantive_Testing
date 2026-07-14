@@ -19,7 +19,7 @@ export function AppShell({
       <Sidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
       <div className="min-w-0 bg-surface">
         <Navbar documentCount={documentCount} onMenu={() => setSidebarOpen(true)} />
-        <main className="mx-auto w-full max-w-6xl px-4 py-8 md:px-8">{children}</main>
+        <main className="mx-auto w-full max-w-[1440px] px-4 py-8 md:px-8">{children}</main>
       </div>
     </div>
   );

@@ -21,12 +21,11 @@ export function Navbar({
             <p className="text-xs text-muted">{documentCount} documents</p>
           </div>
         </div>
-        <div
-          className="flex h-10 w-10 items-center justify-center rounded-full border border-line bg-surface text-sm font-semibold text-ink"
-          aria-label="User profile"
-        >
-          U
-        </div>
+        <input
+          className="hidden h-10 w-64 rounded-xl border border-line bg-surface px-3 text-sm text-ink placeholder:text-muted focus:border-accent md:block"
+          placeholder="Search documents"
+          aria-label="Search documents"
+        />
       </div>
     </header>
   );

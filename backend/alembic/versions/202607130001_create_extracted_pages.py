@@ -24,18 +24,20 @@ def upgrade() -> None:
         sa.Column("document_id", postgresql.UUID(as_uuid=True), nullable=False),
         sa.Column("page_number", sa.Integer(), nullable=False),
         sa.Column("text", sa.Text(), nullable=False),
-        sa.Column("extraction_method", sa.String(), nullable=False),
+        sa.Column("extraction_method", sa.String(length=20), nullable=False),
         sa.Column(
             "created_at",
             sa.DateTime(timezone=True),
             server_default=sa.func.now(),
             nullable=False,
         ),
-        sa.ForeignKeyConstraint(["document_id"], ["documents.id"]),
+        sa.ForeignKeyConstraint(["document_id"], ["documents.id"], ondelete="CASCADE"),
         sa.PrimaryKeyConstraint("id"),
         sa.UniqueConstraint("document_id", "page_number"),
     )
+    op.create_index("ix_extracted_pages_document_id", "extracted_pages", ["document_id"])
 
 
 def downgrade() -> None:
+    op.drop_index("ix_extracted_pages_document_id", table_name="extracted_pages")
     op.drop_table("extracted_pages")

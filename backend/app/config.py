@@ -12,6 +12,7 @@ class Settings(BaseSettings):
     )
     upload_dir: Path = Field(default=Path("uploads"), validation_alias="UPLOAD_DIR")
     allowed_origins: list[str] = Field(default=["*"], validation_alias="ALLOWED_ORIGINS")
+    tesseract_cmd: str | None = Field(default=None, validation_alias="TESSERACT_CMD")
     google_api_key: str | None = Field(default=None, validation_alias="GOOGLE_API_KEY")
     gemini_embedding_model: str = Field(
         default="models/gemini-embedding-001",
