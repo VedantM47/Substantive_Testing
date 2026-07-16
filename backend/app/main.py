@@ -1,4 +1,5 @@
 from fastapi import FastAPI, Request
+from fastapi.encoders import jsonable_encoder
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.exceptions import RequestValidationError
 from fastapi.openapi.utils import get_openapi
@@ -7,6 +8,7 @@ from fastapi.responses import JSONResponse
 from app.api.document import router as document_router
 from app.api.parser import router as parser_router
 from app.config import get_settings
+from app.routes.search import router as search_router
 
 
 settings = get_settings()
@@ -23,6 +25,7 @@ app.add_middleware(
 
 app.include_router(document_router)
 app.include_router(parser_router)
+app.include_router(search_router)
 
 
 def custom_openapi() -> dict:
@@ -55,7 +58,7 @@ def validation_error_handler(
     _request: Request,
     exc: RequestValidationError,
 ) -> JSONResponse:
-    return JSONResponse(status_code=400, content={"detail": exc.errors()})
+    return JSONResponse(status_code=400, content=jsonable_encoder({"detail": exc.errors()}))
 
 
 @app.exception_handler(Exception)

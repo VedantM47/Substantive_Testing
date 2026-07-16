@@ -7,10 +7,17 @@ import { useEffect, useState } from "react";
 import { Button } from "@/components/common/Button";
 import { LoadingSpinner } from "@/components/common/LoadingSpinner";
 import { AppShell } from "@/components/layout/AppShell";
+import { AISearchPanel } from "@/components/viewer/AISearchPanel";
 import { DocumentStats } from "@/components/viewer/DocumentStats";
 import { ProgressDialog } from "@/components/viewer/ProgressDialog";
-import { TextViewer } from "@/components/viewer/TextViewer";
-import { deleteDocument, documentDownloadUrl, getDocument, getDocumentPages, parseDocument } from "@/services/api";
+import {
+  buildSearchIndex,
+  deleteDocument,
+  documentDownloadUrl,
+  getDocument,
+  getDocumentPages,
+  parseDocument,
+} from "@/services/api";
 import type { DocumentMetadata, ExtractedPage } from "@/types/document";
 
 const PDFViewer = dynamic(
@@ -27,7 +34,7 @@ export function ViewerClient({ documentId }: { documentId: string }) {
   const [pages, setPages] = useState<ExtractedPage[]>([]);
   const [pageNumber, setPageNumber] = useState(1);
   const [totalPages, setTotalPages] = useState(0);
-  const [query, setQuery] = useState("");
+  const [highlightText, setHighlightText] = useState("");
   const [isParsing, setIsParsing] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -48,14 +55,22 @@ export function ViewerClient({ documentId }: { documentId: string }) {
     setError(null);
     try {
       const result = await parseDocument(documentId);
-      setPages(await getDocumentPages(documentId));
+      const extractedPages = await getDocumentPages(documentId);
+      setPages(extractedPages);
+      let index;
+      try {
+        index = await buildSearchIndex(extractedPages);
+      } catch {
+        await new Promise((resolve) => window.setTimeout(resolve, 30000));
+        index = await buildSearchIndex(extractedPages);
+      }
       setParseStatus(
         result.pages_failed
           ? `Document parsed with ${result.pages_failed} failed pages.`
-          : `Document Parsed Successfully. ${result.pages_processed} pages extracted.`,
+          : `Document Parsed Successfully. ${result.pages_processed} pages extracted and ${index.chunks_indexed} search chunks indexed.`,
       );
     } catch {
-      setError("Parsing Failed. Retry when the backend OCR service is available.");
+      setError("Parsing or semantic indexing failed. Retry when the backend OCR and AI services are available.");
     } finally {
       setIsParsing(false);
     }
@@ -74,7 +89,10 @@ export function ViewerClient({ documentId }: { documentId: string }) {
     }
   }
 
-  const currentPage = pages.find((page) => page.page === pageNumber);
+  function openSearchResult(page: number, highlight: string) {
+    setPageNumber(Math.min(Math.max(1, page), totalPages || page));
+    setHighlightText(highlight);
+  }
 
   return (
     <AppShell>
@@ -92,7 +110,7 @@ export function ViewerClient({ documentId }: { documentId: string }) {
             <h1 className="text-2xl font-semibold tracking-tight text-ink">
               {document?.filename ?? "Document Details"}
             </h1>
-            <p className="mt-2 text-sm text-muted">OCR parsing workspace prepared for future AI review.</p>
+            <p className="mt-2 text-sm text-muted">Review the source document and locate exact clauses with AI search.</p>
           </div>
           <div className="flex flex-wrap gap-3">
             <Button onClick={() => void handleParse()} disabled={isParsing || !document}>
@@ -146,20 +164,20 @@ export function ViewerClient({ documentId }: { documentId: string }) {
         ) : null}
 
         {document ? (
-          <div className="grid gap-6 xl:grid-cols-[45fr_55fr]">
+          <div className="grid gap-6 xl:grid-cols-[minmax(0,1.05fr)_minmax(380px,0.95fr)]">
             <PDFViewer
               documentId={documentId}
               pageNumber={pageNumber}
               totalPages={totalPages}
+              highlightText={highlightText}
               onPageChange={(page) => setPageNumber(Math.min(Math.max(1, page), totalPages || page))}
               onTotalPages={setTotalPages}
             />
-            <TextViewer
-              page={currentPage}
-              query={query}
-              onQuery={setQuery}
+            <AISearchPanel
+              isParsed={pages.length > 0}
               onParse={() => void handleParse()}
               isParsing={isParsing}
+              onOpenResult={openSearchResult}
             />
           </div>
         ) : null}

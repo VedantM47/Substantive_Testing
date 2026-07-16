@@ -31,3 +31,9 @@ input {
   height: auto !important;
   max-width: 100% !important;
 }
+
+.react-pdf__Page__textContent span.ai-pdf-highlight {
+  background: rgba(250, 204, 21, 0.42);
+  border-radius: 3px;
+  color: transparent;
+}

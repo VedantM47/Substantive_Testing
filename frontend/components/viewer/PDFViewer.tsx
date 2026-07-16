@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Document, Page, pdfjs } from "react-pdf";
 import "react-pdf/dist/Page/AnnotationLayer.css";
 import "react-pdf/dist/Page/TextLayer.css";
@@ -14,18 +14,46 @@ export function PDFViewer({
   documentId,
   pageNumber,
   totalPages,
+  highlightText,
   onPageChange,
   onTotalPages,
 }: {
   documentId: string;
   pageNumber: number;
   totalPages: number;
+  highlightText?: string;
   onPageChange: (page: number) => void;
   onTotalPages: (pages: number) => void;
 }) {
   const [scale, setScale] = useState(1);
   const [loadError, setLoadError] = useState(false);
+  const pageRef = useRef<HTMLDivElement>(null);
   const file = useMemo(() => documentDownloadUrl(documentId), [documentId]);
+
+  function applyHighlight() {
+    const root = pageRef.current;
+    if (!root) return;
+
+    root.querySelectorAll(".ai-pdf-highlight").forEach((node) => node.classList.remove("ai-pdf-highlight"));
+    const terms = (highlightText || "")
+      .replace(/[^\w\s]/g, " ")
+      .split(/\s+/)
+      .filter((term) => term.length > 5)
+      .slice(0, 10);
+    if (!terms.length) return;
+
+    root.querySelectorAll(".react-pdf__Page__textContent span").forEach((node) => {
+      const text = node.textContent?.toLowerCase() || "";
+      if (terms.some((term) => text.includes(term.toLowerCase()))) {
+        node.classList.add("ai-pdf-highlight");
+      }
+    });
+  }
+
+  useEffect(() => {
+    const timer = window.setTimeout(applyHighlight, 250);
+    return () => window.clearTimeout(timer);
+  }, [pageNumber, scale, highlightText]);
 
   return (
     <section className="space-y-4">
@@ -54,13 +82,14 @@ export function PDFViewer({
               onPageChange(1);
             }}
           >
-            <div className="flex justify-center">
+            <div ref={pageRef} className="flex justify-center">
               <Page
                 pageNumber={pageNumber}
                 scale={scale}
                 renderAnnotationLayer
                 renderTextLayer
                 loading={<LoadingSpinner label="Rendering page" />}
+                onRenderTextLayerSuccess={applyHighlight}
               />
             </div>
           </Document>
