@@ -1,8 +1,10 @@
 import logging
 
 from fastapi import APIRouter, Depends, HTTPException, status
+from sqlalchemy.orm import Session
 
 from app.config import Settings, get_settings
+from app.database import get_db
 from app.models.search_models import BuildIndexRequest, IndexResponse, SearchRequest, SearchResponse
 from app.services.embedding_service import MissingGoogleApiKeyError
 from app.services.llm_service import ClauseSelectionError
@@ -34,10 +36,11 @@ def build_search_index(
 @router.post("", response_model=SearchResponse)
 async def search_clauses(
     request: SearchRequest,
+    db: Session = Depends(get_db),
     service: SemanticSearchService = Depends(get_search_service),
 ) -> SearchResponse:
     try:
-        result = await service.search(request.query.strip())
+        result = await service.search(request.query.strip(), db)
     except MissingGoogleApiKeyError as exc:
         raise HTTPException(status_code=status.HTTP_503_SERVICE_UNAVAILABLE, detail=str(exc)) from exc
     except EmptyVectorStoreError as exc:
